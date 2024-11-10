@@ -1,5 +1,6 @@
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+use ic_stable_structures::{DefaultMemoryImpl}; //, Storable;
 use std::cell::RefCell;
-
 use prost::Message;
 use tract_onnx::prelude::*;
 use tract_ndarray::{ArrayD, IxDyn};
@@ -7,13 +8,21 @@ use crate::storage;
 use crate::MODEL_FILE;
 use anyhow::anyhow;
 
+use std::collections::HashMap;
 type Model = SimplePlan<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>>;
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
 
 thread_local! {
+    pub static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
+    RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+
     static MODEL: RefCell<Option<Model>> = RefCell::new(None);
+
+
+    pub static VOCAB: RefCell<HashMap<u32, String>> = RefCell::new(HashMap::new());
+    pub static MERGES: RefCell<HashMap<(u32, u32), u32>> = RefCell::new(HashMap::new());
 }
-
-
 
 /// Constructs a runnable model from the serialized ONNX model.
 pub fn setup() -> TractResult<()> {
@@ -44,7 +53,7 @@ fn setup_model() -> Result<(), String> {
 }
 
 #[ic_cdk::update]
-fn model_inference(max_tokens: u8, numbers: Vec<i64>) -> Result<Vec<i64>, String> {
+pub fn model_inference(max_tokens: u8, numbers: Vec<i64>) -> Result<Vec<i64>, String> {
     create_tensor_and_run_model(max_tokens, numbers).map_err(|err| err.to_string())
 }
 

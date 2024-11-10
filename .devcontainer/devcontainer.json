@@ -1,6 +1,6 @@
 {
   "name": "IC AI HACKER HOUSE ADVANCED",
-  "image": "ghcr.io/dfinity/icp-dev-env:12",
+  "image": "ghcr.io/dfinity/icp-dev-env:13",
   "features": {
     "git-lfs": "latest"
   },

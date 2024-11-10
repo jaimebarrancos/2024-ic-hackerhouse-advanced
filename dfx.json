@@ -22,6 +22,11 @@
       "type": "custom",
       "wasm": "./target/wasm32-wasi/release/icp_gpt2-ic.wasm",
       "build": ["bash src/icp_gpt2/build.sh"],
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ],
       "shrink": true,
       "gzip": true
     }
